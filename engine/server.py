@@ -1,6 +1,5 @@
-from sys import platform
-
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from internal.cfg.cfg import load_config
 from internal.db.check_duplicates import youtube_check_duplicates
@@ -18,7 +17,16 @@ class Artist(BaseModel):
 
 cfg = load_config()
 
+origins = ["http://localhost:5173"]
+
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 
 @app.post("/api/web/v1/artists/daily_update/")

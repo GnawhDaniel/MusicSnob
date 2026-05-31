@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS artists (
 
 CREATE TABLE IF NOT EXISTS youtube_artists (
     youtube_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    youtube_channel_id TEXT NOT NULL,
+    youtube_channel_id TEXT NOT NULL UNIQUE,
     artist_name TEXT
 );
 

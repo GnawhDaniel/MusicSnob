@@ -11,6 +11,7 @@ def youtube_get_deltas(conn):
         FROM youtube_artist_stats
         JOIN youtube_artists ON youtube_artist_stats.youtube_id = youtube_artists.youtube_id
         GROUP BY youtube_artists.youtube_channel_id
+        
         """).fetchall()
 
     for i, delta in enumerate(res):
