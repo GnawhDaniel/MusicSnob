@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import requests
 from internal.cfg.cfg import load_config
 from internal.db.check_duplicates import youtube_check_duplicates
 from internal.db.add_artist_data import youtube_add_artist_data
@@ -8,6 +9,7 @@ from internal.db.insert_artist import youtube_insert_artist
 from internal.youtube.artist import getArtistsByChannelId
 from internal.db.get_artist_deltas import youtube_get_deltas
 from internal.db.get_artist import youtube_get_all_channel_ids
+from internal.utils.utils import download_thumbnail
 
 class Artist(BaseModel):
     media_platform: str
@@ -49,6 +51,14 @@ def daily_update():
 def get_deltas():
     return youtube_get_deltas(cfg["DB_CONN"])
 
+@app.get("/api/web/v1/artist/")
+def get_artist(youtube_channel_id: str):
+    artist_info = getArtistsByChannelId(youtube_channel_id, cfg["YOUTUBE"]["API_URL"], cfg["YOUTUBE"]["API_KEY"])
+    thumbnail_url = artist_info["items"][0]["snippet"]["thumbnails"]["high"]["url"]
+    # print(thumbnail_url)
+    download_thumbnail(thumbnail_url, filename=f"{youtube_channel_id}.png")
+    return artist_info
+
 
 @app.post("/api/web/v1/artists/insert")
 def insert_artist(platform: Artist):
@@ -62,10 +72,11 @@ def insert_artist(platform: Artist):
                 raise HTTPException(status_code=400, detail="Artist already exists in database")
             
             artist_info = getArtistsByChannelId(youtube_channel_id, cfg["YOUTUBE"]["API_URL"], cfg["YOUTUBE"]["API_KEY"])
+            print(artist_info)
             subscribers = artist_info["items"][0]["statistics"]["subscriberCount"]
             total_views = artist_info["items"][0]["statistics"]["viewCount"]
             name = artist_info["items"][0]["brandingSettings"]["channel"]["title"]
-            print(artist_info)
+            
             youtube_insert_artist(conn, youtube_channel_id, subscribers, total_views, name)
         case _:
             raise HTTPException(status_code=400, detail="Unsupported media platform")

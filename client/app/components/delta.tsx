@@ -4,12 +4,8 @@ type DeltaComponentProps = {
   delta: DeltaInterface;
 };
 
-function textColorConditional(view_delta: number) {
-  return view_delta >= 0
-    ? view_delta === 0
-      ? "zero"
-      : "positive"
-    : "negative";
+function textColorConditional(metric: number) {
+  return metric >= 0 ? (metric === 0 ? "zero" : "positive") : "negative";
 }
 
 export default function Delta({ delta }: DeltaComponentProps) {
@@ -19,18 +15,28 @@ export default function Delta({ delta }: DeltaComponentProps) {
 
       <div>
         <p>Initial View: {delta.min_view_count}</p>
-        <p>Initial Subs: {delta.min_subscriber_count}</p>
+        <p className={textColorConditional(delta.views_delta)}>
+          {delta.views_delta > 0 ? "+" : ""}
+          {((delta.views_delta / delta.min_view_count) * 100).toFixed(2)}%
+        </p>
+        <p className={textColorConditional(delta.views_delta)}>
+          {delta.views_delta >= 0 ? "+" : ""}
+          {delta.views_delta} views
+        </p>
       </div>
 
       <div>
-        <p className={textColorConditional(delta.view_delta)}>
-          {delta.view_delta >= 0 ? "+" : ""}{delta.view_delta} views
+        <p>Initial Subs: {delta.earliest_sub_count}</p>
+        <p className={textColorConditional(delta.subs_delta)}>
+          {delta.subs_delta >= 0 ? "+" : ""}
+          {delta.subs_delta} subscribers
         </p>
+        <p className={textColorConditional(delta.subs_delta)}>
+          {delta.subs_delta > 0 ? "+" : ""}
+          {((delta.subs_delta / delta.min_view_count) * 100).toFixed(2)}%        </p>
       </div>
-      <p className={textColorConditional(delta.view_delta)}>
-        {delta.view_delta > 0 ? "+" : ""}
-        {((delta.view_delta / delta.min_view_count) * 100).toFixed(2)}%
-      </p>
+
+      <div></div>
     </>
   );
 }

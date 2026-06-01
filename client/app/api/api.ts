@@ -1,10 +1,11 @@
 export interface DeltaInterface {
-  artist_name: string;
-  min_subscriber_count: number;
-  min_view_count: number;
-  subscriber_delta: number;
-  view_delta: number;
   youtube_channel_id: string;
+  artist_name: string;
+  subs_delta: number;
+  views_delta: number;
+  min_view_count: number;
+  latest_sub_count: number;
+  earliest_sub_count: number
 }
 
 export const apiBaseUrl = "http://localhost:8000/api/web/v1";

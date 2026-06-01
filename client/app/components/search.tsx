@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { addArtist } from "~/api/api";
 
-export default async function SearchBar() {
+export default function SearchBar() {
   const [query, setQuery] = useState("");
 
   async function submitHandler() {
