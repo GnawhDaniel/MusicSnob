@@ -11,6 +11,7 @@ RUN npm ci --omit=dev
 FROM node:20-alpine AS build-env
 COPY . /app/
 COPY --from=development-dependencies-env /app/node_modules /app/node_modules
+ENV VITE_API_BASE_URL=http://localhost:5001/api/web/v1
 WORKDIR /app
 RUN npm run build
 
@@ -23,11 +24,3 @@ ENV HOST=0.0.0.0
 ENV PORT=5000
 EXPOSE 5000
 CMD ["npm", "run", "start"]
-
-# FROM node:20-alpine AS website-prod
-# ENV HOST=0.0.0.0
-# ENV PORT=5000
-# WORKDIR /app
-# COPY . .
-# EXPOSE 5000
-# CMD ["npm", "run", "start"]

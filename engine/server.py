@@ -18,7 +18,7 @@ class Artist(BaseModel):
 
 cfg = load_config()
 
-origins = ["http://localhost:5173"]
+origins = ["http://localhost:5173", "http://web:5000", "http://localhost:8000", "http://localhost:5000"]
 
 app = FastAPI()
 app.add_middleware(
@@ -58,9 +58,11 @@ def get_artist(youtube_channel_id: str):
     return artist_info
 
 
-@app.post("/api/web/v1/artists/insert")
+@app.post("/api/web/v1/artists/insert/")
 def insert_artist(platform: Artist):
     conn = cfg["DB_CONN"]
+    
+    print("test")
     
     match platform.media_platform:
         case "youtube":
@@ -75,7 +77,7 @@ def insert_artist(platform: Artist):
             total_views = artist_info["items"][0]["statistics"]["viewCount"]
             name = artist_info["items"][0]["brandingSettings"]["channel"]["title"]
             thumbnail_url = artist_info["items"][0]["snippet"]["thumbnails"]["high"]["url"]
-
+            print(artist_info)
             youtube_insert_artist(conn, youtube_channel_id, subscribers, total_views, name)
             download_thumbnail(thumbnail_url, filename=f"{youtube_channel_id}.png")
         case _:

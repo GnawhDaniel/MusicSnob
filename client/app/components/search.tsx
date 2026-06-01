@@ -1,13 +1,10 @@
 import { useState } from "react";
-import { addArtist } from "~/api/api";
+import { useFetcher } from "react-router";
 
 export default function SearchBar() {
   const [query, setQuery] = useState("");
 
-  async function submitHandler() {
-    const res = await addArtist(query);
-    console.log(res);
-  }
+  const fetcher = useFetcher();
   // Example ChannelID:
   // UCGjD8QSbPrqHC6sqxsLiB0g
 
@@ -19,7 +16,13 @@ export default function SearchBar() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
-      <button onClick={submitHandler}>Submit</button>
+      <button
+        onClick={() =>
+          fetcher.submit({ youtube_channel_id: query }, { method: "post" })
+        }
+      >
+        Submit
+      </button>
     </div>
   );
 }

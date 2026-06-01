@@ -6,7 +6,10 @@ COPY ./requirements.txt ./requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
-COPY . .
+COPY ./engine /code/engine/
+COPY ./internal /code/internal
+COPY .env /code/.env
+COPY ./db /code/db
 
 EXPOSE 5001
 

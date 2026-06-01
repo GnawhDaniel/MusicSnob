@@ -8,9 +8,14 @@ export interface DeltaInterface {
   earliest_sub_count: number
 }
 
-export const apiBaseUrl = "http://server:5001/api/web/v1";
+export const apiBaseUrl = typeof window === "undefined"
+  ? "http://server:5001/api/web/v1"      // server-side (Node/Docker)
+  : "http://localhost:5001/api/web/v1";  // client-side (browser)
 
 async function callApi(endpoint: string, options?: RequestInit) {
+  console.log(import.meta.env.VITE_API_BASE_URL);
+    console.log(import.meta.env.VITE_TEST);
+
   const res = await fetch(`${apiBaseUrl}${endpoint}`, options);
   if (!res.ok) {
     throw new Error(`API call failed with status ${res.status}`);
