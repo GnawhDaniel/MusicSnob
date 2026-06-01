@@ -1,0 +1,12 @@
+.deltas-list {
+    display: flex;
+    justify-content: space-between;
+}
+
+.positive {
+    color: rgb(101, 250, 101);
+}
+
+.negative {
+    color: red;
+}

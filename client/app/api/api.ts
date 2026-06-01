@@ -20,3 +20,14 @@ async function callApi(endpoint: string, options?: RequestInit) {
 export async function getDeltas(): Promise<DeltaInterface[]> {
   return callApi("/artists/deltas/");
 }
+
+export async function addArtist(youtube_channel_id: string) {
+  const options = {
+    method: "POST",
+    body: JSON.stringify({ media_platform: "youtube", artist_id: youtube_channel_id }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+  return callApi("/artists/insert/", options);
+}

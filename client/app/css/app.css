@@ -1,0 +1,10 @@
+:root {
+  --primary-bg-color: rgb(15, 15, 15);
+  --primary-color: rgb(226, 226, 226);
+}
+
+html,
+body {
+  background-color: var(--primary-bg-color);
+  color: var(--primary-color);
+}

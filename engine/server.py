@@ -35,11 +35,11 @@ def daily_update():
     
     channel_ids = youtube_get_all_channel_ids(cfg["DB_CONN"])
     
+    # TODO: Bundle IDs into groups of 50 into Youtube API call 
     for channel_id in channel_ids:
         artist_info = getArtistsByChannelId(channel_id[0], cfg["YOUTUBE"]["API_URL"], cfg["YOUTUBE"]["API_KEY"])
         subscribers = artist_info["items"][0]["statistics"]["subscriberCount"]
         total_views = artist_info["items"][0]["statistics"]["viewCount"]
-        name = artist_info["items"][0]["brandingSettings"]["channel"]["title"]
         youtube_add_artist_data(cfg["DB_CONN"], channel_id[0], subscribers, total_views)
     
     # youtube_add_artist_data(cfg["DB_CONN"])
@@ -50,7 +50,7 @@ def get_deltas():
     return youtube_get_deltas(cfg["DB_CONN"])
 
 
-@app.post("/api/web/v1/insert_artist/")
+@app.post("/api/web/v1/artists/insert")
 def insert_artist(platform: Artist):
     conn = cfg["DB_CONN"]
     
