@@ -1,0 +1,5 @@
+client
+.venv
+.vscode
+.env.example
+.gitignore

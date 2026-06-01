@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import requests
 from internal.cfg.cfg import load_config
 from internal.db.check_duplicates import youtube_check_duplicates
 from internal.db.add_artist_data import youtube_add_artist_data
@@ -29,7 +28,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
-
 
 @app.post("/api/web/v1/artists/daily_update/")
 def daily_update():
@@ -76,8 +74,10 @@ def insert_artist(platform: Artist):
             subscribers = artist_info["items"][0]["statistics"]["subscriberCount"]
             total_views = artist_info["items"][0]["statistics"]["viewCount"]
             name = artist_info["items"][0]["brandingSettings"]["channel"]["title"]
-            
+            thumbnail_url = artist_info["items"][0]["snippet"]["thumbnails"]["high"]["url"]
+
             youtube_insert_artist(conn, youtube_channel_id, subscribers, total_views, name)
+            download_thumbnail(thumbnail_url, filename=f"{youtube_channel_id}.png")
         case _:
             raise HTTPException(status_code=400, detail="Unsupported media platform")
 
