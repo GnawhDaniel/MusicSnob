@@ -11,11 +11,23 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export async function loader() {
-  const deltas = await getDeltas();
-  return deltas;
+  try {
+    const deltas = await getDeltas();
+    return deltas;
+  } catch (error) {
+    console.log(error)
+  }
+  return null;
 }
 
 export default function Home() {
-  const deltas: DeltaInterface[] = useLoaderData(); 
-  return <HomePage deltas={deltas} />;
+  const deltas: DeltaInterface[] | null = useLoaderData(); 
+  if (deltas) {
+    return <HomePage deltas={deltas} />;
+  }
+  return (
+    <div>
+      <h1>Uh oh... Can't access API server. Try relaunching docker container.</h1>
+    </div>
+  );
 }

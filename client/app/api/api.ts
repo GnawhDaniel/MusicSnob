@@ -8,7 +8,7 @@ export interface DeltaInterface {
   earliest_sub_count: number
 }
 
-export const apiBaseUrl = "http://localhost:8000/api/web/v1";
+export const apiBaseUrl = "http://server:5001/api/web/v1";
 
 async function callApi(endpoint: string, options?: RequestInit) {
   const res = await fetch(`${apiBaseUrl}${endpoint}`, options);
