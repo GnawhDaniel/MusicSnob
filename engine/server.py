@@ -4,7 +4,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+
 from internal.cfg.cfg import load_config
 from internal.db.check_duplicates import youtube_check_duplicates
 from internal.db.add_artist_data import youtube_add_artist_data
@@ -13,14 +15,20 @@ from internal.db.get_artist_deltas import youtube_get_deltas
 from internal.db.get_artist import youtube_get_all_channel_ids
 from internal.db.misc import get_latest_date
 from internal.youtube.artist import getArtistsByChannelId
-from internal.utils.utils import download_thumbnail, download_youtube_missing_thumbnails
+from internal.utils.utils import (
+    download_thumbnail,
+    download_youtube_missing_thumbnails,
+    default_thumbnails_path,
+)
 from datetime import datetime
+
 import pytz
 import logging
 
 logger = logging.getLogger(__name__)
 # logging.basicConfig(level=logging.DEBUG)
 # logging.getLogger("apscheduler").setLevel(logging.DEBUG)
+
 
 cfg = load_config()
 scheduler = BackgroundScheduler()
@@ -61,6 +69,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.mount("/api/web/v1/thumbnail", StaticFiles(directory=default_thumbnails_path), name="thumbnail")
 router = APIRouter(prefix="/api/web/v1")
 
 
