@@ -13,7 +13,7 @@ from internal.db.get_artist_deltas import youtube_get_deltas
 from internal.db.get_artist import youtube_get_all_channel_ids
 from internal.db.misc import get_latest_date
 from internal.youtube.artist import getArtistsByChannelId
-from internal.utils.utils import download_thumbnail
+from internal.utils.utils import download_thumbnail, download_youtube_missing_thumbnails
 from datetime import datetime
 import pytz
 import logging
@@ -67,12 +67,12 @@ router = APIRouter(prefix="/api/web/v1")
 def _do_daily_update():
     # Get all artists, then update stats for each artist.
     channel_ids = youtube_get_all_channel_ids(cfg["DB_CONN"])
-    latest_date: str = get_latest_date(cfg["DB_CONN"])    
-    
+    latest_date: str = get_latest_date(cfg["DB_CONN"])
+
     # Check if new day
     if datetime.now().strftime("%Y-%m-%d") <= latest_date:
         logger.info("Skipping: already updated today")
-        return 
+        return
 
     # TODO: Bundle IDs into groups of 50 into Youtube API call (though API Youtube daily limit is 100,000)
     for channel_id in channel_ids:
@@ -123,20 +123,23 @@ def insert_artist(platform: Artist):
                 )
 
             artist_info = getArtistsByChannelId(youtube_channel_id)
-            print(artist_info)
             subscribers = artist_info["items"][0]["statistics"]["subscriberCount"]
             total_views = artist_info["items"][0]["statistics"]["viewCount"]
             name = artist_info["items"][0]["brandingSettings"]["channel"]["title"]
             thumbnail_url = artist_info["items"][0]["snippet"]["thumbnails"]["high"][
                 "url"
             ]
-            print(artist_info)
             youtube_insert_artist(
                 conn, youtube_channel_id, subscribers, total_views, name
             )
             download_thumbnail(thumbnail_url, filename=f"{youtube_channel_id}.png")
         case _:
             raise HTTPException(status_code=400, detail="Unsupported media platform")
+
+
+@app.get("/utils/_download_youtube_missing_thumbnails")
+def get_youtube_missing_thumbnails():
+    return download_youtube_missing_thumbnails(cfg["DB_CONN"])
 
 
 app.include_router(router)

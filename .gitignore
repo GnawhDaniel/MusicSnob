@@ -5,5 +5,4 @@ node_modules/
 __pycache__/
 *.db
 *.bak
-.env.local
 assets/thumbnails/
