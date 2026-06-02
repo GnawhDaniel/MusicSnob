@@ -3,3 +3,4 @@ client
 .vscode
 .env.example
 .gitignore
+.env.local

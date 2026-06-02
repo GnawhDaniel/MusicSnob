@@ -5,17 +5,14 @@ export interface DeltaInterface {
   views_delta: number;
   min_view_count: number;
   latest_sub_count: number;
-  earliest_sub_count: number
+  earliest_sub_count: number;
 }
 
-export const apiBaseUrl = typeof window === "undefined"
-  ? "http://server:5001/api/web/v1"      // server-side (Node/Docker)
-  : "http://localhost:5001/api/web/v1";  // client-side (browser)
+const apiBaseUrl = typeof window === "undefined"
+  ? (process.env.API_BASE_URL ?? "http://server:5001/api/web/v1")
+  : (import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5001/api/web/v1");
 
 async function callApi(endpoint: string, options?: RequestInit) {
-  console.log(import.meta.env.VITE_API_BASE_URL);
-    console.log(import.meta.env.VITE_TEST);
-
   const res = await fetch(`${apiBaseUrl}${endpoint}`, options);
   if (!res.ok) {
     throw new Error(`API call failed with status ${res.status}`);
@@ -30,7 +27,10 @@ export async function getDeltas(): Promise<DeltaInterface[]> {
 export async function addArtist(youtube_channel_id: string) {
   const options = {
     method: "POST",
-    body: JSON.stringify({ media_platform: "youtube", artist_id: youtube_channel_id }),
+    body: JSON.stringify({
+      media_platform: "youtube",
+      artist_id: youtube_channel_id,
+    }),
     headers: {
       "Content-Type": "application/json",
     },
