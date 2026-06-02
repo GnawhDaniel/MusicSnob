@@ -10,11 +10,11 @@ function textColorConditional(metric: number) {
 
 export default function Delta({ delta }: DeltaComponentProps) {
   return (
-    <>
-      <h1>{delta.artist_name}</h1>
-
+    <div className="delta-container">
       <div>
-        <p>Initial View: {delta.min_view_count.toLocaleString("en-US")}</p>
+        <h3>{delta.artist_name}</h3>
+        <hr />
+        <p>Initial Views: {delta.min_view_count.toLocaleString("en-US")}</p>
         <p className={textColorConditional(delta.views_delta)}>
           {delta.views_delta > 0 ? "+" : ""}
           {((delta.views_delta / delta.min_view_count) * 100).toFixed(2)}%
@@ -23,9 +23,7 @@ export default function Delta({ delta }: DeltaComponentProps) {
           {delta.views_delta >= 0 ? "+" : ""}
           {delta.views_delta.toLocaleString("en-US")} views
         </p>
-      </div>
 
-      <div>
         <p>Initial Subs: {delta.earliest_sub_count.toLocaleString("en-US")}</p>
         <p className={textColorConditional(delta.subs_delta)}>
           {delta.subs_delta >= 0 ? "+" : ""}
@@ -33,10 +31,9 @@ export default function Delta({ delta }: DeltaComponentProps) {
         </p>
         <p className={textColorConditional(delta.subs_delta)}>
           {delta.subs_delta > 0 ? "+" : ""}
-          {((delta.subs_delta / delta.min_view_count) * 100).toFixed(2)}%        </p>
+          {((delta.subs_delta / delta.min_view_count) * 100).toFixed(2)}%{" "}
+        </p>
       </div>
-
-      <div></div>
-    </>
+    </div>
   );
 }

@@ -17,15 +17,13 @@ export default function HomePage({ deltas }: HomePageProps) {
     <>
       <h1>Welcome to the Home Page</h1>
       <SearchBar />
-      <ul className="deltas-list">
+      <div className="deltas-list">
         {deltas_sorted.map((artist) => {
           return (
-            <li key={artist.youtube_channel_id}>
-              <Delta delta={artist} />
-            </li>
+            <Delta delta={artist} />
           );
         })}
-      </ul>
+      </div>
     </>
   );
 }

@@ -1,5 +1,5 @@
 export interface DeltaInterface {
-  youtube_channel_id: string;
+  channel_id: string;
   artist_name: string;
   subs_delta: number;
   views_delta: number;
@@ -8,11 +8,15 @@ export interface DeltaInterface {
   earliest_sub_count: number;
 }
 
-const apiBaseUrl = typeof window === "undefined"
-  ? (process.env.API_BASE_URL ?? "http://server:5001/api/web/v1")
-  : (import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5001/api/web/v1");
-
 async function callApi(endpoint: string, options?: RequestInit) {
+  let apiBaseUrl =
+    typeof window === "undefined"
+      ? (process.env.API_BASE_URL ?? "http://localhost:5001/api/web/v1")
+      : (import.meta.env.VITE_API_BASE_URL ??
+        "http://localhost:5001/api/web/v1");
+
+  console.log(typeof window);
+  console.log(apiBaseUrl);
   const res = await fetch(`${apiBaseUrl}${endpoint}`, options);
   if (!res.ok) {
     throw new Error(`API call failed with status ${res.status}`);
@@ -36,4 +40,18 @@ export async function addArtist(youtube_channel_id: string) {
     },
   };
   return callApi("/artists/insert/", options);
+}
+
+export async function getThumbnail(youtube_channel_id: string) {
+  const options = {
+    method: "GET",
+    body: JSON.stringify({
+      media_platform: "youtube",
+      artist_id: youtube_channel_id,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+  return callApi("/thumbnail/", options);
 }
