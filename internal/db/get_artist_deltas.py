@@ -11,7 +11,8 @@ def youtube_get_deltas(conn):
             max(view_count)-min(view_count) as view_delta, 
             min(view_count) as min_view_count,
             latest_subscriber_count,
-            earliest_subscriber_count
+            earliest_subscriber_count,
+            min(date_pulled) as sub_date
         FROM youtube_artist_stats
         
         JOIN youtube_artists ON youtube_artist_stats.youtube_id = youtube_artists.youtube_id
@@ -44,6 +45,7 @@ def youtube_get_deltas(conn):
         temp_dict["min_view_count"] = delta[4]
         temp_dict["latest_sub_count"] = delta[5]
         temp_dict["earliest_sub_count"] = delta[6]
+        temp_dict["subscription_date"] = delta[7]
         res[i] = temp_dict
 
     return res

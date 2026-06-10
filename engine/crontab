@@ -1,1 +1,0 @@
-1 0 * * * /usr/bin/curl "http://localhost:5001/api/web/v1/artists/daily_update"

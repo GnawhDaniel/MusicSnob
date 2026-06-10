@@ -23,6 +23,7 @@
 
 .delta-container {
     width: 100%;
+    /* width: */
     background-size: contain;
     background-repeat: no-repeat;
     display: flex;
@@ -32,9 +33,3 @@
 .delta-container h3 {
     text-align: center;
 }
-
-/* 
-      className="delta-container"
-      style={{
-        backgroundImage: `url(http://localhost:5001/api/web/v1/thumbnail/${delta.channel_id}.png)`,
-      }} */

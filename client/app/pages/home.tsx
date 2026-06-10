@@ -15,7 +15,7 @@ export default function HomePage({ deltas }: HomePageProps) {
 
   return (
     <>
-      <h1>Welcome to the Home Page</h1>
+      <h1>Music Snob</h1>
       <SearchBar />
       <div className="deltas-list">
         {deltas_sorted.map((artist) => {

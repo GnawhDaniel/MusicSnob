@@ -6,6 +6,7 @@ export interface DeltaInterface {
   min_view_count: number;
   latest_sub_count: number;
   earliest_sub_count: number;
+  subscription_date: string;
 }
 
 async function callApi(endpoint: string, options?: RequestInit) {

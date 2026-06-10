@@ -1,4 +1,5 @@
 import { type DeltaInterface } from "../api/api";
+import { formatDate } from "~/utils/utils";
 
 type DeltaComponentProps = {
   delta: DeltaInterface;
@@ -11,9 +12,10 @@ function textColorConditional(metric: number) {
 export default function Delta({ delta }: DeltaComponentProps) {
   return (
     <div className="delta-container">
-      <div>
+      <div className="delta-card">
         <h3>{delta.artist_name}</h3>
         <hr />
+        <p>since {formatDate(delta.subscription_date)}</p>
         <p>Initial Views: {delta.min_view_count.toLocaleString("en-US")}</p>
         <p className={textColorConditional(delta.views_delta)}>
           {delta.views_delta > 0 ? "+" : ""}
