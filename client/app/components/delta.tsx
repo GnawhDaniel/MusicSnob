@@ -31,7 +31,7 @@ export default function Delta({ delta }: DeltaComponentProps) {
         </p>
         <p className={textColorConditional(delta.subs_delta)}>
           {delta.subs_delta > 0 ? "+" : ""}
-          {((delta.subs_delta / delta.min_view_count) * 100).toFixed(2)}%{" "}
+          {((delta.subs_delta / delta.earliest_sub_count) * 100).toFixed(2)}%{" "}
         </p>
       </div>
     </div>
