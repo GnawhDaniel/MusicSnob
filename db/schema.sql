@@ -16,4 +16,4 @@ CREATE TABLE IF NOT EXISTS youtube_artist_stats (
     view_count INTEGER NOT NULL,
     PRIMARY KEY (youtube_id, date_pulled),
     FOREIGN KEY (youtube_id) REFERENCES youtube_artists(youtube_id) ON DELETE CASCADE
-)
+);

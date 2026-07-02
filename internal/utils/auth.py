@@ -1,5 +1,7 @@
 from argon2.exceptions import VerifyMismatchError
 from argon2 import PasswordHasher
+import secrets
+
 
 ph = PasswordHasher() 
 
@@ -9,12 +11,18 @@ def hash_password(password, max_pass_length=128):
         raise Exception(f"Can't hash password; length exceeds {max_pass_length}.")
     return ph.hash(password) 
 
-def verify_hash(salted_hash: str, salted_password: str) -> bool:
+
+def verify_hash(argon2_hash: str, password: str) -> bool:
     try:
-        ph.verify(salted_hash, salted_password)
+        ph.verify(argon2_hash, password)
         return True
     except VerifyMismatchError:
         return False
+    
+    
+def generate_session_id(length_bytes=16):
+    # According to OWASP, a session ID must be at least 16 hexadecimal char to achieve 64 bits of entropy
+    return secrets.token_urlsafe(length_bytes)
 
 
 if __name__ == "__main__":

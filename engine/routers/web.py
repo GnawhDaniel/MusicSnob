@@ -79,7 +79,7 @@ def insert_artist(platform: Artist):
                     status_code=400, detail="Artist already exists in database"
                 )
 
-            artist_info = getArtistsByChannelId(youtube_channel_id)
+            artist_info = getArtistsByChannelId(youtube_channel_id) #TODO: Handle unknown channel IDs
             subscribers = artist_info["items"][0]["statistics"]["subscriberCount"]
             total_views = artist_info["items"][0]["statistics"]["viewCount"]
             name = artist_info["items"][0]["brandingSettings"]["channel"]["title"]
