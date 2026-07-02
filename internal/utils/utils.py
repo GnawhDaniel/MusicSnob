@@ -29,3 +29,8 @@ def download_youtube_missing_thumbnails(conn):
         download_thumbnail(thumbnail_url, filename=f"{artist_id}.png")
     
     return diff
+
+
+def sanitize_input(string: str) -> str:
+    
+    return
