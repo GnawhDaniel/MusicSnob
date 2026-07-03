@@ -15,6 +15,13 @@ ENV VITE_API_BASE_URL=http://localhost:5001/api/web/v1
 WORKDIR /app
 RUN npm run build
 
+FROM node:26-alpine AS dev
+COPY . /app
+WORKDIR /app
+RUN npm install
+EXPOSE 5173
+CMD ["npm", "run", "dev", "--", "--host"]
+
 FROM node:26-alpine
 RUN apk add --no-cache curl
 COPY ./package.json package-lock.json /app/

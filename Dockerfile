@@ -1,16 +1,21 @@
-FROM python:3.14
-
+FROM python:3.14 as dev
 WORKDIR /code
-
 COPY ./requirements.txt ./requirements.txt
-
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
-
 COPY ./engine /code/engine/
 COPY ./internal /code/internal
 COPY .env /code/.env
 COPY ./db /code/db
-
 EXPOSE 5001
+CMD ["fastapi", "dev", "./engine/server.py", "--host", "0.0.0.0", "--port", "5001"]
 
+FROM python:3.14 as prod
+WORKDIR /code
+COPY ./requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+COPY ./engine /code/engine/
+COPY ./internal /code/internal
+COPY .env /code/.env
+COPY ./db /code/db
+EXPOSE 5001
 CMD ["uvicorn", "engine.server:app", "--host", "0.0.0.0", "--port", "5001"]
