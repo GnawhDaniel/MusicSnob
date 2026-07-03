@@ -12,9 +12,9 @@ export interface DeltaInterface {
 async function callApi(endpoint: string, options?: RequestInit) {
   let apiBaseUrl =
     typeof window === "undefined"
-      ? (process.env.API_BASE_URL ?? "http://localhost:5001/api/web/v1")
+      ? (process.env.API_BASE_URL ?? "http://localhost:5001")
       : (import.meta.env.VITE_API_BASE_URL ??
-        "http://localhost:5001/api/web/v1");
+        "http://localhost:5001");
 
   console.log(typeof window);
   console.log(apiBaseUrl);
@@ -26,7 +26,7 @@ async function callApi(endpoint: string, options?: RequestInit) {
 }
 
 export async function getDeltas(): Promise<DeltaInterface[]> {
-  return callApi("/artists/deltas/");
+  return callApi("/api/web/v1/artists/deltas/");
 }
 
 export async function addArtist(youtube_channel_id: string) {
@@ -40,7 +40,7 @@ export async function addArtist(youtube_channel_id: string) {
       "Content-Type": "application/json",
     },
   };
-  return callApi("/artists/insert/", options);
+  return callApi("/api/web/v1/artists/insert/", options);
 }
 
 export async function getThumbnail(youtube_channel_id: string) {
@@ -54,5 +54,21 @@ export async function getThumbnail(youtube_channel_id: string) {
       "Content-Type": "application/json",
     },
   };
-  return callApi("/thumbnail/", options);
+  return callApi("/api/web/v1/thumbnail/", options);
+}
+
+
+export async function signIn(username: string, password: string) {
+    const options = {
+    method: "POST",
+    body: JSON.stringify({
+      username: username,
+      password: password,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+  return callApi("/api/auth/v1/sign-in/", options);
+
 }

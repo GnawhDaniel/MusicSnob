@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, APIRouter
+from fastapi import APIRouter, HTTPException, APIRouter, Depends
 from pydantic import BaseModel
 
 from internal.db.check_duplicates import youtube_check_duplicates
@@ -11,6 +11,8 @@ from internal.youtube.artist import getArtistsByChannelId
 from internal.utils.utils import download_thumbnail
 
 from internal.cfg.cfg import cfg
+
+from engine.routers.auth import verify_session
 
 from datetime import datetime
 import logging
@@ -67,7 +69,12 @@ def get_artist(youtube_channel_id: str):
 
 
 @router.post("/artists/insert")
-def insert_artist(platform: Artist):
+def insert_artist(platform: Artist, is_valid_session: bool = Depends(verify_session)):
+    if not is_valid_session:
+        # TODO: Redirect
+        print("Not valid")
+        return
+    
     conn = cfg["DB_CONN"]
 
     match platform.media_platform:

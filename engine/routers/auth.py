@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
@@ -18,7 +18,7 @@ def authenticate(auth_fields: AuthenticationFields):
     user = get_user(cfg["AUTH_CONN"], auth_fields.username)
     if not user:
         raise HTTPException(status_code=404, detail=f"Could not find user {auth_fields.username}")
-    username, hashed_pass = user
+    _username, hashed_pass = user
 
     if not verify_hash(hashed_pass, auth_fields.password):
         raise HTTPException(status_code=401, detail="Wrong password")
@@ -26,12 +26,18 @@ def authenticate(auth_fields: AuthenticationFields):
     return user
 
 
+def verify_session(request: Request) -> bool:
+    session = request.cookies.get("__Host-SessionID")
+    print("Session:", session)
+    
+    return False
+
+
 @router.post("/sign-in")
 def sign_in(auth_fields: AuthenticationFields):
         
     # Verify correct password (authentication)
     username, _ = authenticate(auth_fields)
-
     # Create Session
     # ------------------------------------------
     # Generate Session ID
@@ -51,9 +57,10 @@ def sign_in(auth_fields: AuthenticationFields):
         value=session_id, 
         secure=True, 
         httponly= True,
-        samesite='strict',
+        samesite='lax',
         )
     return response
+
 
 
 
