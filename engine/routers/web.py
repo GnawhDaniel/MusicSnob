@@ -71,9 +71,7 @@ def get_artist(youtube_channel_id: str):
 @router.post("/artists/insert")
 def insert_artist(platform: Artist, is_valid_session: bool = Depends(verify_session)):
     if not is_valid_session:
-        # TODO: Redirect
-        print("Not valid")
-        return
+        raise HTTPException(status_code=404, detail="Invalid session")
     
     conn = cfg["DB_CONN"]
 

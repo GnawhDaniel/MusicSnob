@@ -1,25 +1,18 @@
-"use server"
+"use server";
+import { addArtist } from "@/app/actions";
 
 export default async function SearchBar() {
-
   // Example ChannelID:
   // UCGjD8QSbPrqHC6sqxsLiB0g
 
   return (
-    <div className="search-bar">
+    <form className="search-bar" action={addArtist}>
       <input
         type="text"
         placeholder="Youtube Channel ID"
-        // value={""}
-        // onChange={() => null}
+        name="youtube_channel_id"
       />
-      <button
-        // onClick={() =>
-        //   fetcher.submit({ youtube_channel_id: query }, { method: "post" })
-        // }
-      >
-        Submit
-      </button>
-    </div>
+      <button type="submit">Submit</button>
+    </form>
   );
 }

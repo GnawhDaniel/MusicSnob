@@ -2,15 +2,29 @@
 
 import { cookies } from "next/headers";
 import { DeltaInterface } from "@/app/interfaces";
+import { redirect } from "next/navigation";
 
 let apiBaseUrl = "http://server:5001";
 
 export async function callAPI(endpoint: string, options?: RequestInit) {
-  const res = await fetch(`${apiBaseUrl}${endpoint}`, options);
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join("; ");
+
+  const res = await fetch(`${apiBaseUrl}${endpoint}`, {
+    ...options,
+    headers: {
+      ...options?.headers,
+      Cookie: cookieHeader,
+    },
+  });
+
   if (!res.ok) {
     throw new Error(`API call failed with status ${res.status}`);
   }
-  return res; // <-- return the Response itself, not res.json()
+  return res;
 }
 
 export async function getDeltas(): Promise<DeltaInterface[]> {
@@ -18,18 +32,25 @@ export async function getDeltas(): Promise<DeltaInterface[]> {
   return res.json();
 }
 
-export async function addArtist(youtube_channel_id: string) {
-  const res = await callAPI("/api/web/v1/artists/insert/", {
-    method: "POST",
-    body: JSON.stringify({
-      media_platform: "youtube",
-      artist_id: youtube_channel_id,
-    }),
-    headers: { "Content-Type": "application/json" },
-  });
+export async function addArtist(formData: FormData) {
+  const youtube_channel_id = formData.get("youtube_channel_id");
+
+  let res;
+  try {
+    res = await callAPI("/api/web/v1/artists/insert/", {
+      method: "POST",
+      body: JSON.stringify({
+        media_platform: "youtube",
+        artist_id: youtube_channel_id,
+      }),
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    redirect("/sign-in");
+  }
+  
   return res.json();
 }
-
 
 export async function signIn(formData: FormData) {
   const username = formData.get("uname");

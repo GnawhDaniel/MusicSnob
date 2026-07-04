@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from internal.db.auth import get_user, insert_session, remove_session_by_user
+from internal.db.auth import get_user, insert_session, remove_session_by_user, is_session
 from internal.cfg.cfg import cfg
 
 from internal.utils.auth import verify_hash, generate_session_id
@@ -28,10 +28,10 @@ def authenticate(auth_fields: AuthenticationFields):
 
 def verify_session(request: Request) -> bool:
     session = request.cookies.get("__Host-SessionID")
-    print("Session:", session)
+    if not session:
+        return False
+    return is_session(cfg["AUTH_CONN"], session)
     
-    return False
-
 
 @router.post("/sign-in")
 def sign_in(auth_fields: AuthenticationFields):

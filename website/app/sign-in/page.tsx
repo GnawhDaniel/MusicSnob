@@ -8,8 +8,6 @@ export default async function sign_in() {
       <form className="sign-in" action={signIn}>
         <label htmlFor="uname">Username</label>
         <input
-        //   value={username}
-        //   onChange={(e) => setUsername(e.target.value)}
           type="text"
           placeholder="Enter Username"
           name="uname"
@@ -18,8 +16,6 @@ export default async function sign_in() {
 
         <label htmlFor="passwd">Password</label>
         <input
-        //   value={passwd}
-        //   onChange={(e) => setPasswd(e.target.value)}
           type="password"
           name="passwd"
           required

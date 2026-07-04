@@ -20,6 +20,7 @@ services:
       - "5001:5001"
     volumes:
       - ./db/data.db:/code/db/data.db:rw
+      - ./db/auth.db:/code/db/auth.db:rw
       - ./assets/thumbnails:/code/assets/thumbnails/
       - ./engine:/code/engine/
       - ./internal:/code/internal/
