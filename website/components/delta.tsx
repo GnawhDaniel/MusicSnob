@@ -1,5 +1,5 @@
-import { type DeltaInterface } from "../api/api";
-import { formatDate } from "~/utils/utils";
+import { type DeltaInterface } from "@/app/interfaces";
+import { formatDate } from "@/utils/utils";
 
 type DeltaComponentProps = {
   delta: DeltaInterface;

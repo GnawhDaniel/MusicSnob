@@ -1,4 +1,4 @@
-FROM python:3.14 as dev
+FROM python:3.14 AS dev
 WORKDIR /code
 COPY ./requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
@@ -9,7 +9,7 @@ COPY ./db /code/db
 EXPOSE 5001
 CMD ["fastapi", "dev", "./engine/server.py", "--host", "0.0.0.0", "--port", "5001"]
 
-FROM python:3.14 as prod
+FROM python:3.14 AS prod
 WORKDIR /code
 COPY ./requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
