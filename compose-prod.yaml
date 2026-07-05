@@ -1,0 +1,20 @@
+services:
+  web:
+    build: 
+      context: ./website
+      target: prod
+    ports:
+      - "5000:5000"
+    depends_on:
+      - server
+
+  server:
+    build: 
+      context: .
+      target: prod
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./db/data.db:/code/db/data.db:rw
+      - ./db/auth.db:/code/db/auth.db:rw
+      - ./assets/thumbnails:/code/assets/thumbnails/
