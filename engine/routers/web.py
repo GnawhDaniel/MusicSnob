@@ -85,6 +85,10 @@ def insert_artist(platform: Artist, is_valid_session: bool = Depends(verify_sess
                 )
 
             artist_info = getArtistsByChannelId(youtube_channel_id) #TODO: Handle unknown channel IDs
+            
+            if (artist_info["pageInfo"]["totalResults"] == 0): 
+                raise HTTPException(status_code=400, detail=f"Could not find channel id {youtube_channel_id}")
+
             subscribers = artist_info["items"][0]["statistics"]["subscriberCount"]
             total_views = artist_info["items"][0]["statistics"]["viewCount"]
             name = artist_info["items"][0]["brandingSettings"]["channel"]["title"]

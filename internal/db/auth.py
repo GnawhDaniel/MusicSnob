@@ -27,7 +27,13 @@ def remove_session_by_user(conn, username):
 def is_session(conn, session_id) -> bool:
     cursor = conn.cursor()
     session_id = sha256(session_id.encode('utf-8')).hexdigest()
-    res = cursor.execute("SELECT * FROM auth_sessions WHERE session_id = ?", (session_id,))
-    if res.fetchone():
-        return True
-    return False
+    res = cursor.execute("SELECT * FROM auth_sessions WHERE session_id = ?", (session_id,)).fetchone()
+    if not res: return False
+
+    # Check token expiry
+    _id, _uname, _created_date, expiry, _ip = res
+    expiry = datetime.strptime(expiry, "%Y-%m-%d %H:%M:%S.%f")
+    if (datetime.now() > expiry):
+        return False
+    
+    return True
