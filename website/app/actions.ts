@@ -56,23 +56,29 @@ export async function signIn(formData: FormData) {
   const username = formData.get("uname");
   const password = formData.get("passwd");
 
-  const res = await callAPI("/api/auth/v1/sign-in/", {
-    method: "POST",
-    body: JSON.stringify({ username, password }),
-    headers: { "Content-Type": "application/json" },
-  });
+  let res;
 
-
-  // getSetCookie() returns string[] — one entry per Set-Cookie header
-  const setCookies = res.headers.getSetCookie();
-  const cookieStore = await cookies();
-
-  for (const cookieStr of setCookies) {
-    const parsed = parseSetCookie(cookieStr);
-    cookieStore.set(parsed.name, parsed.value, parsed.options);
+  try {
+    res = await callAPI("/api/auth/v1/sign-in/", {
+      method: "POST",
+      body: JSON.stringify({ username, password }),
+      headers: { "Content-Type": "application/json" },
+    });
+    // getSetCookie() returns string[] — one entry per Set-Cookie header
+    const setCookies = res.headers.getSetCookie();
+    const cookieStore = await cookies();
+  
+    for (const cookieStr of setCookies) {
+      const parsed = parseSetCookie(cookieStr);
+      cookieStore.set(parsed.name, parsed.value, parsed.options);
+    }
+  
+  
+  } catch (e) {
+    // TODO: Handle errors (invalid credentials, 5xx, etc.)
   }
 
-  return res.json();
+  redirect("/");
 }
 
 export async function getThumbnail(youtube_channel_id: string) {

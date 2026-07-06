@@ -1,2 +1,0 @@
-Front Page:
-List of artists and percentage deltas (sorted) (maybe top n)
