@@ -1,4 +1,3 @@
-from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 from apscheduler.schedulers.background import BackgroundScheduler
 from contextlib import asynccontextmanager
 
@@ -6,17 +5,15 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from internal.cfg.cfg import cfg, load_config
+from internal.cfg.cfg import load_config
 from internal.utils.utils import default_thumbnails_path
 
 from .routers import auth, web
 
-import pytz
-import logging
+import db.models as models
+from db.database import engine
 
-logger = logging.getLogger(__name__)
-# logging.basicConfig(level=logging.DEBUG)
-# logging.getLogger("apscheduler").setLevel(logging.DEBUG)
+import pytz
 
 
 scheduler = BackgroundScheduler()
@@ -53,14 +50,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 app.mount("/api/web/v1/thumbnail", StaticFiles(directory=default_thumbnails_path), name="thumbnail")
 
-
-# @app.get("/utils/_download_youtube_missing_thumbnails")
-# def get_youtube_missing_thumbnails():
-#     return download_youtube_missing_thumbnails(cfg["DB_CONN"])
-
+# Only creates new, if db does not exist
+# Use alembic for any modifications of schema
+models.Base.metadata.create_all(bind=engine) 
 
 app.include_router(web.router)
 app.include_router(auth.router)
