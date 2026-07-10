@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from sqlalchemy import func
+from db.database import SessionLocal
 from internal.db.database import (
     youtube_get_all_channel_ids,
     get_latest_date,
@@ -12,13 +12,11 @@ from internal.db.database import (
 )
 from internal.youtube.artist import getArtistsByChannelId
 from internal.utils.utils import download_thumbnail
-from internal.cfg.cfg import cfg
 from engine.routers.auth import verify_session
 from datetime import datetime
 import logging
 from typing import Annotated
 from sqlalchemy.orm import Session
-from db.models import Artists, YouTubeArtists, YouTubeArtistStats
 
 
 logger = logging.getLogger(__name__)
@@ -33,28 +31,32 @@ class Artist(BaseModel):
 
 
 def _do_daily_update():
-    # Get all artists, then update stats for each artist.
-    channel_ids = youtube_get_all_channel_ids(cfg["DB_CONN"])
-    latest_date: str = get_latest_date(cfg["DB_CONN"])
+    db = SessionLocal()
+    try:
+        # Get all artists, then update stats for each artist.
+        channel_ids = youtube_get_all_channel_ids(db)
+        latest_date: str = get_latest_date(db)
 
-    # Check if new day
-    if datetime.now().strftime("%Y-%m-%d") <= latest_date:
-        logger.info("Skipping: already updated today")
-        return
+        # Check if new day
+        if datetime.now().strftime("%Y-%m-%d") <= latest_date.strftime("%Y-%m-%d"):
+            logger.info("Skipping: already updated today")
+            return
 
-    # TODO: Bundle IDs into groups of 50 into Youtube API call (though API Youtube daily limit is 100,000)
-    for channel_id in channel_ids:
-        artist_info = getArtistsByChannelId(channel_id[0])
-        subscribers = artist_info["items"][0]["statistics"]["subscriberCount"]
-        total_views = artist_info["items"][0]["statistics"]["viewCount"]
-        youtube_add_artist_data(cfg["DB_CONN"], channel_id[0], subscribers, total_views)
+        # TODO: Bundle IDs into groups of 50 into Youtube API call (though API Youtube daily limit is 100,000)
+        for channel_id in channel_ids:
+            artist_info = getArtistsByChannelId(channel_id[0])
+            subscribers = artist_info["items"][0]["statistics"]["subscriberCount"]
+            total_views = artist_info["items"][0]["statistics"]["viewCount"]
+            youtube_add_artist_data(db, channel_id[0], subscribers, total_views)
+    finally:
+        db.close()
 
 
 @router.post("/artists/daily_update")
 async def daily_update(db: db_dependency):
     # Get all artists, then update stats for each artist.
 
-    latest_date: datetime = db.query(func.max(YouTubeArtistStats.date_pulled)).scalar()
+    latest_date: datetime = get_latest_date(db)
 
     # Check if new day
     if datetime.now().strftime("%Y-%m-%d") <= latest_date.strftime("%Y-%m-%d"):
@@ -62,7 +64,7 @@ async def daily_update(db: db_dependency):
             status_code=425, detail="Already pulled today's artists data."
         )
 
-    _do_daily_update()
+    _do_daily_update(db)
 
 
 @router.get("/artists/deltas")
@@ -71,20 +73,17 @@ async def get_deltas(db: db_dependency):
 
 
 @router.get("/artist/")
-def get_artist(youtube_channel_id: str):
+async def get_artist(youtube_channel_id: str, _is_valid_session = Depends(verify_session)):
     artist_info = getArtistsByChannelId(youtube_channel_id)
     return artist_info
 
 
 @router.post("/artists/insert")
-def insert_artist(
+async def insert_artist(
     platform: Artist,
     db: db_dependency,
-    is_valid_session: bool = Depends(verify_session),
+    _is_valid_session = Depends(verify_session),
 ):
-    if not is_valid_session:
-        raise HTTPException(status_code=404, detail="Invalid session")
-
     match platform.media_platform:
         case "youtube":
             youtube_channel_id = platform.artist_id

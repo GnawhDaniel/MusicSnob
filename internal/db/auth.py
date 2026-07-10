@@ -1,39 +1,47 @@
 from hashlib import sha256
 from datetime import datetime, timedelta
+from sqlalchemy import delete, select
+from sqlalchemy.orm import Session
 
-def get_user(conn, username):
-    cursor = conn.cursor()
-    cursor.execute("SELECT user_id, hashed_pass FROM users WHERE user_id = ?", (username,))
-    res = cursor.fetchone()
-    return res
+from db.models import AuthSessions, Users
 
-def insert_session(conn, session_id, username):
-    cursor = conn.cursor()
-    sha256_sessionid = sha256(session_id.encode('utf-8')).hexdigest()
+
+def get_user(db: Session, username: str):
+    stmt = select(Users.user_id, Users.hashed_pass).where(Users.user_id == username)
+    return db.execute(stmt).first()
+
+
+def insert_session(db: Session, session_id, username):
+    sha256_sessionid = sha256(session_id.encode("utf-8")).hexdigest()
     created_at = datetime.now()
     expiry = created_at + timedelta(days=1)
 
-    cursor.execute("""
-                   INSERT INTO auth_sessions(session_id, user_id, created_at, expiry)
-                   VALUES (?, ?, ?, ?)
-                   """, (sha256_sessionid, username, created_at, expiry,))
-    conn.commit()
+    session = AuthSessions(
+        session_id=sha256_sessionid,
+        user_id=username,
+        created_at=created_at,
+        expiry=expiry,
+    )
+    db.add(session)
+    db.commit()
 
-def remove_session_by_user(conn, username):
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM auth_sessions WHERE user_id = ?", (username,))
-    conn.commit()
 
-def is_session(conn, session_id) -> bool:
-    cursor = conn.cursor()
-    session_id = sha256(session_id.encode('utf-8')).hexdigest()
-    res = cursor.execute("SELECT * FROM auth_sessions WHERE session_id = ?", (session_id,)).fetchone()
-    if not res: return False
+def remove_session_by_user(db: Session, username: str):
+    stmt = delete(AuthSessions).where(AuthSessions.user_id == username)
+    db.execute(stmt)
+    db.commit()
+
+
+def is_session(db: Session, session_id) -> bool:
+    hashed_id = sha256(session_id.encode("utf-8")).hexdigest()
+    
+    session = db.get(AuthSessions, hashed_id)
+    
+    if not session:
+        return False
 
     # Check token expiry
-    _id, _uname, _created_date, expiry, _ip = res
-    expiry = datetime.strptime(expiry, "%Y-%m-%d %H:%M:%S.%f")
-    if (datetime.now() > expiry):
+    if datetime.now() > session.expiry:
         return False
-    
+
     return True

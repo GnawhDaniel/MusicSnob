@@ -1,4 +1,4 @@
-from sqlalchemy import func, text
+from sqlalchemy import func, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from db.database import SessionLocal
@@ -28,32 +28,35 @@ def get_latest_date(db):
     return db.query(func.max(YouTubeArtistStats.date_pulled)).scalar()
 
 
-def youtube_get_all_channel_ids(conn):
-    cursor = conn.cursor()
-    cursor.execute("SELECT youtube_channel_id FROM youtube_artists")
-    return cursor.fetchall()
+def youtube_get_all_channel_ids(db: Session):
+    stmt = select(YouTubeArtists.youtube_channel_id)
+    return db.execute(stmt).scalars().all()
 
 
-def youtube_add_artist_data(conn, youtube_channel_id, subscribers, total_views):
-    cursor = conn.cursor()
-
+def youtube_add_artist_data(
+    db: Session,
+    youtube_channel_id: str,
+    subscribers: int,
+    total_views: int,
+):
     # Get youtube_id from youtube_artists table
-    r = cursor.execute(
-        "SELECT youtube_id FROM youtube_artists WHERE youtube_channel_id = ?",
-        (youtube_channel_id,),
+    stmt = select(YouTubeArtists.youtube_id).where(
+        YouTubeArtists.youtube_channel_id == youtube_channel_id
     )
-    youtube_id = r.fetchone()[0]
+    youtube_id = db.execute(stmt).scalar_one()
 
-    cursor.execute(
-        "INSERT OR IGNORE INTO youtube_artist_stats(youtube_id, subscriber_count, view_count, date_pulled) VALUES (?, ?, ?, ?)",
-        (
-            youtube_id,
-            subscribers,
-            total_views,
-            datetime.datetime.today().strftime("%Y-%m-%d"),
-        ),
+    stats = YouTubeArtistStats(
+        youtube_id=youtube_id,
+        subscriber_count=subscribers,
+        view_count=total_views,
+        date_pulled=datetime.today(),
     )
-    conn.commit()
+    db.add(stats)
+
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()  # row for this youtube_id + date already exists — ignore, matches OR IGNORE
 
 
 def youtube_insert_artist(

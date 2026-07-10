@@ -5,7 +5,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from internal.cfg.cfg import load_config
 from internal.utils.utils import default_thumbnails_path
 
 from .routers import auth, web
@@ -18,7 +17,6 @@ import pytz
 
 scheduler = BackgroundScheduler()
 
-load_config()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
