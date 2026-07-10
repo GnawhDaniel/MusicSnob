@@ -7,7 +7,7 @@ export default async function Home() {
   const deltas = await getDeltas();
   let deltas_sorted = deltas.sort(
     (a, b) =>
-      b.views_delta / b.min_view_count - a.views_delta / a.min_view_count,
+      b.view_delta / b.min_view_count - a.view_delta / a.min_view_count,
   );
   return (
     <div>
@@ -15,7 +15,7 @@ export default async function Home() {
       <SearchBar />
       <div className="deltas-list">
         {deltas_sorted.map((artist) => {
-          return <Delta key={artist.channel_id} delta={artist}/>
+          return <Delta key={artist.youtube_channel_id} delta={artist}/>
         })}
       </div>
     </div>

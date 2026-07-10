@@ -1,10 +1,10 @@
 export interface DeltaInterface {
-  channel_id: string;
+  youtube_channel_id: string;
   artist_name: string;
-  subs_delta: number;
-  views_delta: number;
+  subscriber_delta: number;
+  view_delta: number;
   min_view_count: number;
-  latest_sub_count: number;
-  earliest_sub_count: number;
-  subscription_date: string;
+  latest_subscriber_count: number;
+  earliest_subscriber_count: number;
+  sub_date: string;
 }
