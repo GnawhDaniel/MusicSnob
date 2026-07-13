@@ -33,7 +33,6 @@ async def lifespan(app: FastAPI):
 
 
 origins = [
-    "http://localhost:5173",
     "http://web:5000",
     "http://localhost:8000",
     "http://localhost:5000",
@@ -50,9 +49,15 @@ app.add_middleware(
 )
 app.mount("/api/web/v1/thumbnail", StaticFiles(directory=default_thumbnails_path), name="thumbnail")
 
-# Only creates new, if db does not exist
-# Use alembic for any modifications of schema
+# Only creates new, if db/table does not exist
+# Use alembic for any modifications to table columns
 models.Base.metadata.create_all(bind=engine) 
+
+
+@app.get("/healthy")
+def health_check():
+    return {"status": "Healthy"}
+
 
 app.include_router(web.router)
 app.include_router(auth.router)
