@@ -6,5 +6,5 @@ __pycache__/
 *.db
 *.bak
 assets/thumbnails/
-
-test/
+alembic/
+alembic.ini
