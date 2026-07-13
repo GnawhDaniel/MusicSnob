@@ -31,6 +31,9 @@ class Artist(BaseModel):
 
 
 def _do_daily_update():
+    # Creating Session here because of CRON job in server.py
+    # TODO: Consider parameter db=None and handle cases from server.py
+    #       and daily_update endpoint. 
     db = SessionLocal()
     try:
         # Get all artists, then update stats for each artist.
@@ -44,10 +47,11 @@ def _do_daily_update():
 
         # TODO: Bundle IDs into groups of 50 into Youtube API call (though API Youtube daily limit is 100,000)
         for channel_id in channel_ids:
-            artist_info = getArtistsByChannelId(channel_id[0])
+            print("\n\n\n\n",channel_id)
+            artist_info = getArtistsByChannelId(channel_id)
             subscribers = artist_info["items"][0]["statistics"]["subscriberCount"]
             total_views = artist_info["items"][0]["statistics"]["viewCount"]
-            youtube_add_artist_data(db, channel_id[0], subscribers, total_views)
+            youtube_add_artist_data(db, channel_id, subscribers, total_views)
     finally:
         db.close()
 
@@ -64,7 +68,7 @@ async def daily_update(db: db_dependency):
             status_code=425, detail="Already pulled today's artists data."
         )
 
-    _do_daily_update(db)
+    _do_daily_update()
 
 
 @router.get("/artists/deltas")
@@ -72,7 +76,7 @@ async def get_deltas(db: db_dependency):
     return youtube_get_deltas(db)
 
 
-@router.get("/artist/")
+@router.get("/artist")
 async def get_artist(youtube_channel_id: str, _is_valid_session = Depends(verify_session)):
     artist_info = getArtistsByChannelId(youtube_channel_id)
     return artist_info

@@ -38,7 +38,7 @@ def authenticate(db: Session, auth_fields: AuthenticationFields):
     return user
 
 
-def verify_session(request: Request) -> bool:
+def verify_session(request: Request):
     db = SessionLocal()
     try:
         session = request.cookies.get("__Host-SessionID")

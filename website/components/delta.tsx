@@ -10,7 +10,6 @@ function textColorConditional(metric: number) {
 }
 
 export default function Delta({ delta }: DeltaComponentProps) {
-  console.log(delta);
   return (
     <div className="delta-container" id={delta.youtube_channel_id}>
       <div className="delta-card">

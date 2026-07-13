@@ -49,7 +49,7 @@ def youtube_add_artist_data(
         youtube_id=youtube_id,
         subscriber_count=subscribers,
         view_count=total_views,
-        date_pulled=datetime.today(),
+        date_pulled=datetime.datetime.today(),
     )
     db.add(stats)
 
