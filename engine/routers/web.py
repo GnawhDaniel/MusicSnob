@@ -1,3 +1,4 @@
+import os
 import logging
 from datetime import datetime
 from typing import Annotated
@@ -39,7 +40,7 @@ def _do_daily_update():
     try:
         # Get all artists, then update stats for each artist.
         channel_ids = youtube_get_all_channel_ids(db)
-        latest_date: str = get_latest_date(db)
+        latest_date: str = get_latest_date(db)If this is a fork or the secret was added as an Environment secret rather than a repository secret, ${{ secrets.YOUTUB
 
         # Check if new day
         if datetime.now().strftime("%Y-%m-%d") <= latest_date.strftime("%Y-%m-%d"):
@@ -104,6 +105,7 @@ async def insert_artist(
                 youtube_channel_id
             )  # TODO: Handle unknown channel IDs
 
+            print(f"DEBUG: key length = {len(os.getenv('YOUTUBE_API_KEY', ''))}")       
             print("DEBUG:", artist_info)
             
             if artist_info["pageInfo"]["totalResults"] == 0:
