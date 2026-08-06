@@ -1,19 +1,17 @@
-from apscheduler.schedulers.background import BackgroundScheduler
+from pathlib import Path
 from contextlib import asynccontextmanager
 
+import pytz
+from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+import db.models as models
+from db.database import engine
 from internal.utils.utils import default_thumbnails_path
 
 from .routers import auth, web
-
-import db.models as models
-from db.database import engine
-
-import pytz
-
 
 scheduler = BackgroundScheduler()
 
@@ -47,6 +45,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+if not Path(default_thumbnails_path).is_dir():
+    Path(default_thumbnails_path).mkdir(parents=True)
+
 app.mount("/api/web/v1/thumbnail", StaticFiles(directory=default_thumbnails_path), name="thumbnail")
 
 # Only creates new, if db/table does not exist
