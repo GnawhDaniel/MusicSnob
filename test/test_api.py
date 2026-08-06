@@ -1,66 +1,40 @@
-from fastapi.testclient import TestClient
-from fastapi import status
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-from sqlalchemy import create_engine, text
-from engine.routers.auth import verify_session
-import engine.server
-from internal.db.database import get_db
-from db.models import Base, YouTubeArtistStats, YouTubeArtists
-import pytest
 from datetime import datetime, timedelta
 
-app = engine.server.app
-SQL_ALCHEMY_DATABASE_URL = "sqlite:///./db/testdb.db"
-engine = create_engine(
-    SQL_ALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
+import pytest
+from fastapi import status
+from sqlalchemy import text
+
+from db.models import YouTubeArtists, YouTubeArtistStats
+from engine.routers.auth import verify_session
+from internal.db.database import get_db
+from test.utils import (
+    TestingSessionLocal,
+    app,
+    client,
+    engine,
+    override_get_db,
+    override_verify_session_noauth,
 )
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base.metadata.create_all(bind=engine)
 
 
-# ==================== Overrides ====================
-def override_get_db():
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-def override_verify_session():
-    return
-
-
-app.dependency_overrides[get_db] = override_get_db
-app.dependency_overrides[verify_session] = override_verify_session
-
-
-# ==================== TESTS ====================
-client = TestClient(app)
+@pytest.fixture(autouse=True)
+def dependency_overrides():
+    app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[verify_session] = override_verify_session_noauth
+    yield
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture
-def test_deltas():
+def test_update():
     artist = YouTubeArtists(
-        youtube_id=1,
-        youtube_channel_id="testchannelid",
-        artist_name="test"
+        youtube_id=1, youtube_channel_id="UC0Q7Hlz75NYhYAuq6O0fqHw", artist_name="Jeremy's IT Lab"
     )
-    
     artist_stat_1 = YouTubeArtistStats(
         youtube_id=1,
         date_pulled=datetime.now() - timedelta(days=1),
         subscriber_count=100,
-        view_count=10_000
-    )
-    artist_stat_2 = YouTubeArtistStats(
-        youtube_id=1,
-        date_pulled=datetime.now(),
-        subscriber_count=1000,
-        view_count=100_000
+        view_count=10_000,
     )
     
     db = TestingSessionLocal()
@@ -68,9 +42,40 @@ def test_deltas():
     db.commit()
     db.add(artist_stat_1)
     db.commit()
+    yield
+    with engine.connect() as connection:
+        connection.execute(text("DELETE FROM youtube_artists;"))
+        connection.execute(text("DELETE FROM youtube_artist_stats;"))
+        connection.commit()
+    
+
+@pytest.fixture
+def test_deltas():
+    artist = YouTubeArtists(
+        youtube_id=1, youtube_channel_id="testchannelid", artist_name="test"
+    )
+
+    artist_stat_1 = YouTubeArtistStats(
+        youtube_id=1,
+        date_pulled=datetime.now() - timedelta(days=1),
+        subscriber_count=100,
+        view_count=10_000,
+    )
+    artist_stat_2 = YouTubeArtistStats(
+        youtube_id=1,
+        date_pulled=datetime.now(),
+        subscriber_count=1_000,
+        view_count=100_000,
+    )
+
+    db = TestingSessionLocal()
+    db.add(artist)
+    db.commit()
+    db.add(artist_stat_1)
+    db.commit()
     db.add(artist_stat_2)
     db.commit()
-    yield 
+    yield
     with engine.connect() as connection:
         connection.execute(text("DELETE FROM youtube_artists;"))
         connection.execute(text("DELETE FROM youtube_artist_stats;"))
@@ -101,9 +106,20 @@ def test_get_artist():
 def test_get_deltas(test_deltas):
     response = client.get("/api/web/v1/artists/deltas")
     assert response.status_code == status.HTTP_200_OK
-    
+
     data = response.json()
-    views = data[0]["view_delta"]  
+    views = data[0]["view_delta"]
     subs = data[0]["subscriber_delta"]
     assert views == 90_000
     assert subs == 900
+
+
+def test_daily_update(test_update):
+    response = client.post("/api/web/v1/artists/daily_update")
+    assert response.status_code == status.HTTP_200_OK
+
+
+def test_daily_update_fail(test_deltas):
+    response = client.post("/api/web/v1/artists/daily_update")
+    assert response.status_code == status.HTTP_425_TOO_EARLY
+    assert response.json() == {"detail": "Already pulled today's artists data."}
