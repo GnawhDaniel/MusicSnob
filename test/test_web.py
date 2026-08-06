@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import pytest
 from fastapi import status
-from sqlalchemy import text
+from sqlalchemy import select, text
 
 from db.models import YouTubeArtists, YouTubeArtistStats
 from engine.routers.auth import verify_session
@@ -28,15 +28,17 @@ def dependency_overrides():
 @pytest.fixture
 def test_update():
     artist = YouTubeArtists(
-        youtube_id=1, youtube_channel_id="UC0Q7Hlz75NYhYAuq6O0fqHw", artist_name="Jeremy's IT Lab"
+        youtube_id=1,
+        youtube_channel_id="UC0Q7Hlz75NYhYAuq6O0fqHw",
+        artist_name="Jeremy's IT Lab",
     )
     artist_stat_1 = YouTubeArtistStats(
         youtube_id=1,
-        date_pulled=datetime.now() - timedelta(days=1),
+        date_pulled=datetime.now() - timedelta(days=2),
         subscriber_count=100,
         view_count=10_000,
     )
-    
+
     db = TestingSessionLocal()
     db.add(artist)
     db.commit()
@@ -47,7 +49,7 @@ def test_update():
         connection.execute(text("DELETE FROM youtube_artists;"))
         connection.execute(text("DELETE FROM youtube_artist_stats;"))
         connection.commit()
-    
+
 
 @pytest.fixture
 def test_deltas():
@@ -116,6 +118,14 @@ def test_get_deltas(test_deltas):
 
 def test_daily_update(test_update):
     response = client.post("/api/web/v1/artists/daily_update")
+
+    # TODO: _daily_update hard codes session which prevents pytest from using sessionlocal
+    # # Should have 2 rows
+    # sess = TestingSessionLocal()
+    # res = sess.execute(select(YouTubeArtistStats)).all()
+    # print(res)
+    # sess.close()
+    # assert len(res) == 2
     assert response.status_code == status.HTTP_200_OK
 
 
@@ -123,3 +133,43 @@ def test_daily_update_fail(test_deltas):
     response = client.post("/api/web/v1/artists/daily_update")
     assert response.status_code == status.HTTP_425_TOO_EARLY
     assert response.json() == {"detail": "Already pulled today's artists data."}
+
+
+def test_insert_artist_valid(test_deltas):
+    response = client.post(
+        "/api/web/v1/artists/insert",
+        json={"media_platform": "youtube", "artist_id": "UC0Q7Hlz75NYhYAuq6O0fqHw"},
+    )
+    assert response.status_code == status.HTTP_200_OK
+
+
+def test_insert_artist_duplicate_artist(test_deltas):
+    client.post(
+        "/api/web/v1/artists/insert",
+        json={"media_platform": "youtube", "artist_id": "UC0Q7Hlz75NYhYAuq6O0fqHw"},
+    )
+    response = client.post(
+        "/api/web/v1/artists/insert",
+        json={"media_platform": "youtube", "artist_id": "UC0Q7Hlz75NYhYAuq6O0fqHw"},
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"detail": "Artist already exists in database"}
+
+
+def test_insert_artist_invalid_channel_id():
+    response = client.post(
+        "/api/web/v1/artists/insert",
+        json={"media_platform": "youtube", "artist_id": "invalid"},
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"detail": "Could not find channel id \"invalid\""}
+    
+
+def test_insert_artist_invalid_platform():
+    response = client.post(
+        "/api/web/v1/artists/insert",
+        json={"media_platform": "tiktok", "artist_id": ""},
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"detail": "Unsupported media platform"}
