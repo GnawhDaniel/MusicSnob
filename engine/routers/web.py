@@ -34,7 +34,7 @@ class Artist(BaseModel):
 def _do_daily_update():
     # Creating Session here because of CRON job in server.py
     # TODO: Consider parameter db=None and handle cases from server.py
-    #       and daily_update endpoint. 
+    #       and daily_update endpoint.
     db = SessionLocal()
     try:
         # Get all artists, then update stats for each artist.
@@ -48,7 +48,7 @@ def _do_daily_update():
 
         # TODO: Bundle IDs into groups of 50 into Youtube API call (though API Youtube daily limit is 100,000)
         for channel_id in channel_ids:
-            print("\n\n\n\n",channel_id)
+            print("\n\n\n\n", channel_id)
             artist_info = getArtistsByChannelId(channel_id)
             subscribers = artist_info["items"][0]["statistics"]["subscriberCount"]
             total_views = artist_info["items"][0]["statistics"]["viewCount"]
@@ -78,7 +78,9 @@ async def get_deltas(db: db_dependency):
 
 
 @router.get("/artist")
-async def get_artist(youtube_channel_id: str, _is_valid_session = Depends(verify_session)):
+async def get_artist(
+    youtube_channel_id: str, _is_valid_session=Depends(verify_session)
+):
     artist_info = getArtistsByChannelId(youtube_channel_id)
     return artist_info
 
@@ -87,7 +89,7 @@ async def get_artist(youtube_channel_id: str, _is_valid_session = Depends(verify
 async def insert_artist(
     platform: Artist,
     db: db_dependency,
-    _is_valid_session = Depends(verify_session),
+    _is_valid_session=Depends(verify_session),
 ):
     match platform.media_platform:
         case "youtube":
@@ -105,7 +107,7 @@ async def insert_artist(
             if artist_info["pageInfo"]["totalResults"] == 0:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Could not find channel id {youtube_channel_id}",
+                    detail=f'Could not find channel id "{youtube_channel_id}"',
                 )
 
             subscribers = artist_info["items"][0]["statistics"]["subscriberCount"]

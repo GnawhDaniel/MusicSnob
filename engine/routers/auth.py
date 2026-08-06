@@ -29,9 +29,7 @@ class AuthenticationFields(BaseModel):
 def authenticate(db: Session, auth_fields: AuthenticationFields):
     user = get_user(db, auth_fields.username)
     if not user:
-        raise HTTPException(
-            status_code=404, detail=f"Could not find user {auth_fields.username}"
-        )
+        raise HTTPException(status_code=404, detail="Could not find user")
     _username, hashed_pass = user
 
     if not verify_hash(hashed_pass, auth_fields.password):
@@ -48,6 +46,7 @@ def verify_session(request: Request):
             raise HTTPException(status_code=404, detail="Invalid session")
     finally:
         db.close()
+
 
 @router.post("/sign-in")
 def sign_in(auth_fields: AuthenticationFields, db: db_dependency):
