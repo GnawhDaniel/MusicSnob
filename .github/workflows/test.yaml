@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  test-pytests:
+  test-pytest:
     runs-on: ubuntu-latest
     container:
       image: python:3.14.4
