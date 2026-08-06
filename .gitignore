@@ -9,3 +9,4 @@ assets/thumbnails/
 alembic/
 alembic.ini
 .coverage
+.pytest_cache/
