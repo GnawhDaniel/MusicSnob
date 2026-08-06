@@ -8,3 +8,4 @@ __pycache__/
 assets/thumbnails/
 alembic/
 alembic.ini
+.coverage
