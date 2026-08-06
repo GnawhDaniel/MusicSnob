@@ -104,6 +104,8 @@ async def insert_artist(
                 youtube_channel_id
             )  # TODO: Handle unknown channel IDs
 
+            print("DEBUG:", artist_info)
+            
             if artist_info["pageInfo"]["totalResults"] == 0:
                 raise HTTPException(
                     status_code=400,
