@@ -1,23 +1,24 @@
-from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
-from db.database import SessionLocal
-from internal.db.database import (
-    youtube_get_all_channel_ids,
-    get_latest_date,
-    youtube_add_artist_data,
-    get_db,
-    youtube_get_deltas,
-    youtube_check_duplicates,
-    youtube_insert_artist
-)
-from internal.youtube.artist import getArtistsByChannelId
-from internal.utils.utils import download_thumbnail
-from engine.routers.auth import verify_session
-from datetime import datetime
 import logging
+from datetime import datetime
 from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from db.database import SessionLocal
+from engine.routers.auth import verify_session
+from internal.db.database import (
+    get_db,
+    get_latest_date,
+    youtube_add_artist_data,
+    youtube_check_duplicates,
+    youtube_get_all_channel_ids,
+    youtube_get_deltas,
+    youtube_insert_artist,
+)
+from internal.utils.utils import download_thumbnail
+from internal.youtube.artist import getArtistsByChannelId
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/web/v1")

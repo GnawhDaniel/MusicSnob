@@ -1,17 +1,19 @@
 from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
+
 from db.database import SessionLocal
 from internal.db.auth import (
     get_user,
     insert_session,
-    remove_session_by_user,
     is_session,
+    remove_session_by_user,
 )
 from internal.db.database import get_db
-from internal.utils.auth import verify_hash, generate_session_id
+from internal.utils.auth import generate_session_id, verify_hash
 
 router = APIRouter(prefix="/api/auth/v1")
 db_dependency = Annotated[Session, Depends(get_db)]
@@ -64,7 +66,7 @@ def sign_in(auth_fields: AuthenticationFields, db: db_dependency):
     insert_session(db, session_id, username)
 
     # Return Cookie with Session ID
-    response = JSONResponse(status_code=200, content={"detail": "success"})
+    response = JSONResponse(status_code=200, content={"detail": "Sign-in succesful"})
     response.set_cookie(
         key="__Host-SessionID",
         value=session_id,

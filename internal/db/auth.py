@@ -41,7 +41,4 @@ def is_session(db: Session, session_id) -> bool:
         return False
 
     # Check token expiry
-    if datetime.now() > session.expiry:
-        return False
-
-    return True
+    return not datetime.now() > session.expiry
