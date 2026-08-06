@@ -1,0 +1,28 @@
+name: Test Project
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-pytests:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.14.4
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -r requirements.txt
+      - run: pytest --cov=engine --cov-report=term-missing
+
+  test-web:
+    runs-on: ubuntu-latest
+    container:
+      image: node:26
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npm run build
