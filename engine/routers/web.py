@@ -103,10 +103,7 @@ async def insert_artist(
 
             artist_info = getArtistsByChannelId(
                 youtube_channel_id
-            )  # TODO: Handle unknown channel IDs
-
-            print(f"DEBUG: key length = {len(os.getenv('YOUTUBE_API_KEY', ''))}")       
-            print("DEBUG:", artist_info)
+            )
             
             if artist_info["pageInfo"]["totalResults"] == 0:
                 raise HTTPException(

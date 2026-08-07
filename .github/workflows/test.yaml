@@ -12,6 +12,7 @@ jobs:
     container:
       image: python:3.14.4
     steps:
+      - uses: actions/checkout@v4
       - name: Create .env file
         run: |
           cat << EOF > .env
@@ -20,7 +21,6 @@ jobs:
           MUSICSNOB_USER=test
           MUSICSNOB_PASS=test
           EOF
-      - uses: actions/checkout@v4
       - run: pip install -r requirements.txt
       - run: pytest -s --cov=engine --cov-report=term-missing
 
