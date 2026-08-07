@@ -1,6 +1,7 @@
-from dotenv import load_dotenv, find_dotenv
-from pathlib import Path
 import os
+from pathlib import Path
+
+from dotenv import load_dotenv
 
 env_path = Path(__file__).resolve().parents[2] / ".env"
 print(f"DEBUG: __file__ = {Path(__file__).resolve()}", flush=True)

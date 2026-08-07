@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import pytest
 from fastapi import status
-from sqlalchemy import select, text
+from sqlalchemy import text
 
 from db.models import YouTubeArtists, YouTubeArtistStats
 from engine.routers.auth import verify_session
