@@ -22,7 +22,7 @@ jobs:
           EOF
       - uses: actions/checkout@v4
       - run: pip install -r requirements.txt
-      - run: pytest --cov=engine --cov-report=term-missing
+      - run: pytest -s --cov=engine --cov-report=term-missing
 
   test-web:
     runs-on: ubuntu-latest
