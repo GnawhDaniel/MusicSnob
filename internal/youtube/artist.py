@@ -1,5 +1,7 @@
 import requests
-from internal.cfg.cfg import youtube_api_url, youtube_api_key
+
+from internal.cfg.cfg import youtube_api_key, youtube_api_url
+
 
 def getArtistsByChannelId(channel_ids):
     r = requests.get(f"{youtube_api_url}/channels?part=statistics,brandingSettings,snippet&id={channel_ids}&key={youtube_api_key}")
