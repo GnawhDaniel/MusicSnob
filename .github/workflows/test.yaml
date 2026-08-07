@@ -13,8 +13,16 @@ jobs:
       image: python:3.14.4
     steps:
       - uses: actions/checkout@v4
+      - name: Create .env file
+        run: |
+          cat << EOF > .env
+          YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }}
+          DEFAULT_DB_PATH="./db/data.db"
+          MUSICSNOB_USER=test
+          MUSICSNOB_PASS=test
+          EOF
       - run: pip install -r requirements.txt
-      - run: pytest --cov=engine --cov-report=term-missing
+      - run: pytest -s --cov=engine --cov-report=term-missing
 
   test-web:
     runs-on: ubuntu-latest

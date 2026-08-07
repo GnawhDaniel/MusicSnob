@@ -1,3 +1,4 @@
+import os
 import logging
 from datetime import datetime
 from typing import Annotated
@@ -102,8 +103,8 @@ async def insert_artist(
 
             artist_info = getArtistsByChannelId(
                 youtube_channel_id
-            )  # TODO: Handle unknown channel IDs
-
+            )
+            
             if artist_info["pageInfo"]["totalResults"] == 0:
                 raise HTTPException(
                     status_code=400,
