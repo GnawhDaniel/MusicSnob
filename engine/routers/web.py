@@ -1,4 +1,3 @@
-import os
 import logging
 from datetime import datetime
 from typing import Annotated
@@ -40,7 +39,7 @@ def _do_daily_update():
     try:
         # Get all artists, then update stats for each artist.
         channel_ids = youtube_get_all_channel_ids(db)
-        latest_date: str = get_latest_date(db)If this is a fork or the secret was added as an Environment secret rather than a repository secret, ${{ secrets.YOUTUB
+        latest_date: str = get_latest_date(db)
 
         # Check if new day
         if datetime.now().strftime("%Y-%m-%d") <= latest_date.strftime("%Y-%m-%d"):
