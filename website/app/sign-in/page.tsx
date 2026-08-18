@@ -4,7 +4,7 @@ import { signIn } from "@/app/actions";
 export default async function sign_in() {
 
   return (
-    <div>
+    <div className="search">
       <form className="sign-in" action={signIn}>
         <label htmlFor="uname">Username</label>
         <input

@@ -1,7 +1,7 @@
 FROM node:latest AS dev
 COPY . /app
 WORKDIR /app
-RUN npm install
+RUN npm ci
 CMD ["npm", "run", "dev"]
 
 # ----------------------------------------------------------
