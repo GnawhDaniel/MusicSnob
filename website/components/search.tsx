@@ -11,6 +11,7 @@ export default async function SearchBar() {
         type="text"
         placeholder="Youtube Channel ID"
         name="youtube_channel_id"
+        autoComplete="off"
       />
       <button type="submit">Submit</button>
     </form>
