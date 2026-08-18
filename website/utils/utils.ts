@@ -15,6 +15,6 @@ const months = [
 
 export function formatDate(date: string) {
   // Expects YYYY-MM-DD
-  let res = new Date(date);
-  return `${months[res.getMonth()]} ${res.getDate()}, ${res.getFullYear()}`
+  const res = new Date(date);
+  return `${months[res.getUTCMonth()]} ${res.getUTCDate()}, ${res.getUTCFullYear()}`;
 }
