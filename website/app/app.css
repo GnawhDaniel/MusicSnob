@@ -56,3 +56,8 @@ input {
 .search-bar input {
     padding: 3px;
 }
+
+.sort-controls {
+    display: flex;
+    justify-content: right;
+}
