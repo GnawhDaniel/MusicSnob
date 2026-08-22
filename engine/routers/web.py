@@ -5,6 +5,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from starlette import status
 
 from db.database import SessionLocal
 from engine.routers.auth import verify_session
@@ -13,7 +14,9 @@ from internal.db.database import (
     get_latest_date,
     youtube_add_artist_data,
     youtube_check_duplicates,
+    youtube_delete_artist,
     youtube_get_all_channel_ids,
+    youtube_get_artist,
     youtube_get_deltas,
     youtube_insert_artist,
 )
@@ -89,7 +92,7 @@ async def get_artist(
 async def insert_artist(
     platform: Artist,
     db: db_dependency,
-    _is_valid_session=Depends(verify_session),
+    _is_valid_session=Depends(verify_session),  # noqa: B008
 ):
     match platform.media_platform:
         case "youtube":
@@ -100,10 +103,8 @@ async def insert_artist(
                     status_code=400, detail="Artist already exists in database"
                 )
 
-            artist_info = getArtistsByChannelId(
-                youtube_channel_id
-            )
-            
+            artist_info = getArtistsByChannelId(youtube_channel_id)
+
             if artist_info["pageInfo"]["totalResults"] == 0:
                 raise HTTPException(
                     status_code=400,
@@ -122,3 +123,22 @@ async def insert_artist(
             download_thumbnail(thumbnail_url, filename=f"{youtube_channel_id}.png")
         case _:
             raise HTTPException(status_code=400, detail="Unsupported media platform")
+
+
+@router.post("/artists/delete")
+async def delete_artist(
+    platform: Artist, db: db_dependency, _is_valid_session=Depends(verify_session)
+):
+    youtube_delete_artist(db, platform.artist_id)
+
+
+@router.get("/artists/get")
+async def get_artist_from_db(
+    youtube_channel_id: str,
+    db: db_dependency,
+    _is_valid_session=Depends(verify_session),
+):
+    ret = youtube_get_artist(db, youtube_channel_id)
+    if not ret: HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    
+    return ret

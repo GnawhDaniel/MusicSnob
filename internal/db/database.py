@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy import func, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -68,7 +69,6 @@ def youtube_insert_artist(
 ):
     # TODO: implement ability to manually merge artists;
     # probably by repointing artist_id from youtube_artists to desired artists id.
-    print(name)
 
     try:
         # Create new entry in artists table
@@ -96,6 +96,43 @@ def youtube_insert_artist(
     except IntegrityError:
         db.rollback()
         raise  # or handle duplicate channel_id gracefully here
+
+
+def youtube_get_artist(db: Session, youtube_channel_id: str):
+    yt_artist = (
+        db.query(YouTubeArtists)
+        .filter(YouTubeArtists.youtube_channel_id == youtube_channel_id)
+        .first()
+    )
+    
+    if yt_artist is None:
+        raise HTTPException(status_code=404, detail="YouTube artist not found")
+
+    return yt_artist
+
+def youtube_delete_artist(db: Session, youtube_channel_id: str):
+    try:
+        yt_artist = (
+            db.query(YouTubeArtists)
+            .filter(YouTubeArtists.youtube_channel_id == youtube_channel_id)
+            .first()
+        )
+
+        if yt_artist is None:
+            raise HTTPException(status_code=404, detail="YouTube artist not found")
+
+        artist = db.query(Artists).filter(Artists.name == yt_artist.artist_name).first()
+
+        if artist is None:
+            raise HTTPException(status_code=404, detail="Artist not found")
+
+        db.delete(artist)
+        db.delete(yt_artist)
+        db.commit()
+
+    except IntegrityError:
+        db.rollback()
+        raise
 
 
 # Gets all artists, consider pulling only "n" artist at a time
