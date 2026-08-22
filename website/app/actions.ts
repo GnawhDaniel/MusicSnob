@@ -110,6 +110,11 @@ export async function getArtistInfo(youtube_channel_id: string) {
         method: "GET",
       },
     );
+
+    if (res.status == 404) {
+      return null;
+    }
+
     return res.json();
   } catch (e) {
     console.log(e);

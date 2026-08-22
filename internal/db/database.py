@@ -121,12 +121,14 @@ def youtube_delete_artist(db: Session, youtube_channel_id: str):
         if yt_artist is None:
             raise HTTPException(status_code=404, detail="YouTube artist not found")
 
-        artist = db.query(Artists).filter(Artists.name == yt_artist.artist_name).first()
+        # TODO: phase out artists table
+        # artist = db.query(Artists).filter(Artists.name == yt_artist.artist_name).first()
 
-        if artist is None:
-            raise HTTPException(status_code=404, detail="Artist not found")
+        # if artist is None:
+        #     raise HTTPException(status_code=404, detail="Artist not found")
 
-        db.delete(artist)
+        # db.delete(artist)
+        
         db.delete(yt_artist)
         db.commit()
 
