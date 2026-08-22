@@ -48,8 +48,31 @@ export async function addArtist(formData: FormData) {
   } catch (e) {
     redirect("/sign-in");
   }
-  
-  return res.json();
+
+  // return res.json();
+  return redirect("/"); // Refresh page to see added artist
+}
+
+export async function deleteArtist(youtube_channel_id: string) {
+  try {
+    const res = await callAPI("/api/web/v1/artists/delete", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        media_platform: "youtube",
+        artist_id: youtube_channel_id,
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Request failed: ${res.status}`);
+    }
+  } catch (err) {}
+  console.log("Deleted successfully");
+  return redirect("/");
 }
 
 export async function signIn(formData: FormData) {
@@ -67,13 +90,11 @@ export async function signIn(formData: FormData) {
     // getSetCookie() returns string[] — one entry per Set-Cookie header
     const setCookies = res.headers.getSetCookie();
     const cookieStore = await cookies();
-  
+
     for (const cookieStr of setCookies) {
       const parsed = parseSetCookie(cookieStr);
       cookieStore.set(parsed.name, parsed.value, parsed.options);
     }
-  
-  
   } catch (e) {
     // TODO: Handle errors (invalid credentials, 5xx, etc.)
   }
@@ -81,16 +102,23 @@ export async function signIn(formData: FormData) {
   redirect("/");
 }
 
-export async function getThumbnail(youtube_channel_id: string) {
-  const res = await callAPI("/api/web/v1/thumbnail/", {
-    method: "GET",
-    body: JSON.stringify({
-      media_platform: "youtube",
-      artist_id: youtube_channel_id,
-    }),
-    headers: { "Content-Type": "application/json" },
-  });
-  return res.json();
+export async function getArtistInfo(youtube_channel_id: string) {
+  try {
+    const res = await callAPI(
+      `/api/web/v1/artists/get?youtube_channel_id=${youtube_channel_id}`,
+      {
+        method: "GET",
+      },
+    );
+
+    if (res.status == 404) {
+      return null;
+    }
+
+    return res.json();
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 // Minimal Set-Cookie string parser

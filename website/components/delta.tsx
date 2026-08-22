@@ -1,5 +1,6 @@
 import { type DeltaInterface } from "@/app/interfaces";
 import { formatDate } from "@/utils/utils";
+import Link from "next/link";
 
 type DeltaComponentProps = {
   delta: DeltaInterface;
@@ -11,7 +12,11 @@ function textColorConditional(metric: number) {
 
 export default function Delta({ delta }: DeltaComponentProps) {
   return (
-    <div className="delta-container" id={delta.youtube_channel_id}>
+    <Link
+      className="delta-container"
+      id={delta.youtube_channel_id}
+      href={`/artist/${delta.youtube_channel_id}`}
+    >
       <div className="delta-card">
         <h3>{delta.artist_name}</h3>
         <hr />
@@ -26,16 +31,23 @@ export default function Delta({ delta }: DeltaComponentProps) {
           {delta.view_delta.toLocaleString("en-US")} views
         </p>
 
-        <p>Initial Subs: {delta.earliest_subscriber_count.toLocaleString("en-US")}</p>
+        <p>
+          Initial Subs:{" "}
+          {delta.earliest_subscriber_count.toLocaleString("en-US")}
+        </p>
         <p className={textColorConditional(delta.subscriber_delta)}>
           {delta.subscriber_delta >= 0 ? "+" : ""}
           {delta.subscriber_delta.toLocaleString("en-US")} subscribers
         </p>
         <p className={textColorConditional(delta.subscriber_delta)}>
           {delta.subscriber_delta > 0 ? "+" : ""}
-          {((delta.subscriber_delta / delta.earliest_subscriber_count) * 100).toFixed(2)}%{" "}
+          {(
+            (delta.subscriber_delta / delta.earliest_subscriber_count) *
+            100
+          ).toFixed(2)}
+          %{" "}
         </p>
       </div>
-    </div>
+    </Link>
   );
 }

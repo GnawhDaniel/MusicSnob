@@ -1,63 +1,76 @@
 html {
-    margin: 0 100px;
+  margin: 0 100px;
 }
 
 .deltas-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  position: relative;
 }
 
 .artist-stats {
-    z-index: 3;
+  z-index: 3;
 }
 
 .positive {
-    color: rgb(101, 250, 101);
+  color: rgb(101, 250, 101);
 }
 
 .negative {
-    color: red;
+  color: red;
 }
 
 .thumbnail {
-    object-fit: contain;
-    position: absolute;
+  object-fit: contain;
+  position: absolute;
 }
 
 .delta-container {
-    width: 100%;
-    /* width: */
-    background-size: contain;
-    background-repeat: no-repeat;
-    display: flex;
-    justify-content: center;
+  /* Treat like a div */
+  all: unset;
+  cursor: pointer;
+
+
+  width: max-content;
+  /* width: */
+  background-size: contain;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  padding: 30px;
+  margin-top: 30px;
+}
+
+.delta-container:hover {
+  background-color: rgb(44, 44, 44);
+  border-radius: 10px;
+  cursor: pointer;
 }
 
 .delta-container h3 {
-    text-align: center;
+  text-align: center;
 }
 
 header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 input {
-    border-radius: 5px;
+  border-radius: 5px;
 }
 
 .search-bar {
-    display: flex;
-    gap: 2px;
+  display: flex;
+  gap: 2px;
 }
 
 .search-bar input {
-    padding: 3px;
+  padding: 3px;
 }
 
 .sort-controls {
-    display: flex;
-    justify-content: right;
+  display: flex;
+  justify-content: right;
 }

@@ -4,7 +4,7 @@ import pytest
 from fastapi import status
 from sqlalchemy import text
 
-from db.models import YouTubeArtists, YouTubeArtistStats
+from db.models import Artists, YouTubeArtists, YouTubeArtistStats
 from engine.routers.auth import verify_session
 from internal.db.database import get_db
 from test.utils import (
@@ -53,7 +53,7 @@ def test_update():
 
 @pytest.fixture
 def test_deltas():
-    artist = YouTubeArtists(
+    yt_artist = YouTubeArtists(
         youtube_id=1, youtube_channel_id="testchannelid", artist_name="test"
     )
 
@@ -71,7 +71,7 @@ def test_deltas():
     )
 
     db = TestingSessionLocal()
-    db.add(artist)
+    db.add(yt_artist)
     db.commit()
     db.add(artist_stat_1)
     db.commit()
@@ -120,13 +120,13 @@ def test_get_deltas(test_deltas):
 # def test_daily_update(test_update):
 #     response = client.post("/api/web/v1/artists/daily_update")
 
-    # # Should have 2 rows
-    # sess = TestingSessionLocal()
-    # res = sess.execute(select(YouTubeArtistStats)).all()
-    # print(res)
-    # sess.close()
-    # assert len(res) == 2
-    # assert response.status_code == status.HTTP_200_OK
+# # Should have 2 rows
+# sess = TestingSessionLocal()
+# res = sess.execute(select(YouTubeArtistStats)).all()
+# print(res)
+# sess.close()
+# assert len(res) == 2
+# assert response.status_code == status.HTTP_200_OK
 
 
 def test_daily_update_fail(test_deltas):
@@ -163,8 +163,8 @@ def test_insert_artist_invalid_channel_id():
         json={"media_platform": "youtube", "artist_id": "invalid"},
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {"detail": "Could not find channel id \"invalid\""}
-    
+    assert response.json() == {"detail": 'Could not find channel id "invalid"'}
+
 
 def test_insert_artist_invalid_platform():
     response = client.post(
@@ -173,3 +173,51 @@ def test_insert_artist_invalid_platform():
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {"detail": "Unsupported media platform"}
+
+
+def test_get_artist_invalid():
+    response = client.get(
+        "/api/web/v1/artists/get?youtube_channel_id=notarealchannelid"
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_get_artist_valid(test_deltas):
+    response = client.get("/api/web/v1/artists/get?youtube_channel_id=testchannelid")
+    assert response.json() == {
+        "youtube_id": 1,
+        "youtube_channel_id": "testchannelid",
+        "artist_name": "test",
+    }
+    assert response.status_code == status.HTTP_200_OK
+
+
+def test_delete_artist_valid(test_deltas):
+    response = client.post(
+        "/api/web/v1/artists/delete",
+        json={"media_platform": "youtube", "artist_id": "testchannelid"},
+    )
+    assert response.status_code == status.HTTP_200_OK
+
+    db = TestingSessionLocal()
+    try:
+        rows = db.query(YouTubeArtists).all()
+        assert len(rows) == 0, f"Expected no rows, but got {len(rows)}"
+    finally:
+        db.close()
+
+
+def test_delete_artist_invalid(test_deltas):
+    response = client.post(
+        "/api/web/v1/artists/delete",
+        json={"media_platform": "youtube", "artist_id": "nonexistant"},
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {"detail": "YouTube artist not found"}
+
+    db = TestingSessionLocal()
+    try:
+        rows = db.query(YouTubeArtists).all()
+        assert len(rows) == 1, f"Expected 1 rows, but got {len(rows)}"
+    finally:
+        db.close()
