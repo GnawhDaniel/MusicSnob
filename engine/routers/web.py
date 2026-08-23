@@ -136,7 +136,6 @@ async def delete_artist(
 async def get_artist_from_db(
     youtube_channel_id: str,
     db: db_dependency,
-    _is_valid_session=Depends(verify_session),
 ):
     ret = youtube_get_artist(db, youtube_channel_id)
     if not ret: HTTPException(status_code=status.HTTP_404_NOT_FOUND)
