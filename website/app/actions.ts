@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { DeltaInterface } from "@/app/interfaces";
 import { redirect } from "next/navigation";
+import { getYouTubeChannelID } from "@/utils/youtube";
 
 let apiBaseUrl = "http://server:5001";
 
@@ -33,7 +34,15 @@ export async function getDeltas(): Promise<DeltaInterface[]> {
 }
 
 export async function addArtist(formData: FormData) {
-  const youtube_channel_id = formData.get("youtube_channel_id");
+  let youtube_channel_id: string = formData.get("youtube_channel_id")?.toString() || "";
+
+  // Check if URL
+  const match = youtube_channel_id.match(
+    /youtube\.com\/channel\/([^/?#]+)/
+  );
+  if (match) {
+    youtube_channel_id = await getYouTubeChannelID(youtube_channel_id) || "";
+  }
 
   let res;
   try {
